@@ -1,0 +1,110 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include Bootstrap CSS (Make sure to have it installed or linked from CDN) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Other head elements -->
+
+    <!-- Custom CSS for fixed-height cards and responsive images -->
+    <style>
+        .card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd; /* Optional: Add border for better visibility */
+        }
+
+        .card-img-top {
+            flex-grow: 1;
+            object-fit: cover;
+            cursor: pointer; /* Add cursor pointer to indicate clickability */
+        }
+
+        .roi-overlay {
+            position: absolute;
+            border: 2px solid red;
+            box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Reference Images</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="files[]" accept=".jpg, .jpeg, .png" multiple required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <!-- Display uploaded images in a responsive 4-column grid -->
+        <div class="row">
+            {% for image in uploaded_images %}
+                <div class="col-md-3 mb-3">
+                    <div class="card" id="card{{ loop.index }}">
+                        <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="{{ image }}" class="card-img-top" data-toggle="modal" data-target="#imageModal{{ loop.index }}">
+                        <div class="card-body">
+                            <p class="card-text">{{ image }}</p>
+                            <button class="btn btn-primary" onclick="selectROI('{{ image }}')">Select ROI</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for each image -->
+                <div class="modal fade" id="imageModal{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="imageModal{{ loop.index }}Label" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="imageModal{{ loop.index }}Label">Image Preview</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="{{ image }}" class="img-fluid" id="modalImage{{ loop.index }}">
+                                <div id="roiInfo{{ loop.index }}" class="mt-2"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Start Process Button -->
+        <button onclick="location.href='/process'" class="start-process-btn btn btn-primary mt-3">Start Process</button>
+    </div>
+
+    <!-- Include Bootstrap JS (Optional, only if needed) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Include your custom script.js -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Custom JavaScript for ROI drawing using OpenCV -->
+    <script src="https://docs.opencv.org/master/opencv.js"></script>
+    <script>
+        // Function to select ROI for a specific image
+        function selectROI(imageName) {
+            $.ajax({
+                type: 'GET',
+                url: '/select_roi/' + imageName,
+                success: function (data) {
+                    // Display ROI information beneath the image
+                    var roiInfoElement = document.getElementById('roiInfo' + imageName);
+                    roiInfoElement.innerHTML = 'ROI Coordinates: ' +
+                        'x=' + data.x + ', y=' + data.y + ', width=' + data.width + ', height=' + data.height;
+
+                    // Reload the image in the modal to include the drawn ROI
+                    var modalImageElement = document.getElementById('modalImage' + imageName);
+                    modalImageElement.src = '/static/uploads/roi_' + imageName;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

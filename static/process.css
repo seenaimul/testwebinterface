@@ -1,0 +1,16 @@
+/* static/process.css */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.process-container {
+    display: flex;
+}
+
+.webcam-container,
+.image-display-container {
+    width: 50%;
+}

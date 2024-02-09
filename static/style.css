@@ -1,0 +1,27 @@
+/* static/style.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+}
+
+.image-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.image-container img {
+    width: 150px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.start-process-btn {
+    margin-top: 20px;
+}
